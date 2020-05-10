@@ -24,10 +24,10 @@ unsigned char halfPer;
 int mode = 0;
 
 int main() {
-	DDRD = 0xFF;
-	PORTD = 0xFF;
-	DDRE = 0xBF;
-	PORTE |= (1<<5); // off
+	DDRD = 0xFF; // make ouput
+	PORTD = 0xFF; // turn off active high LEDs
+	DDRE = 0xBF; // make port 6 input, rest output
+	PORTE |= (1<<5); // 5th LED off
 	DDRA = 0x00; // make PA input
 	PORTA = 0xFF; // enable pull up on PA
 	
@@ -42,50 +42,50 @@ int main() {
 	halfPer = 0;
 	
 	while (1) {
-		if (bit_is_clear(PINA, PA0)) {
+		if (bit_is_clear(PINA, PA0)) { // start button
 			mode = 1;
-		} else if (bit_is_clear(PINA, PA1)) {
+		} else if (bit_is_clear(PINA, PA1)) { // stop button
 			mode = 0;
-		} else if (bit_is_clear(PINA, PA2)) {
+		} else if (bit_is_clear(PINA, PA2)) { // clear button
 			mode = -1;
-		} else if (bit_is_clear(PINE, PE6)) {
+		} else if (bit_is_clear(PINE, PE6)) { // timer mode
 			mode = -1;
-			while (bit_is_clear(PINE, PE6)) {}
+			while (bit_is_clear(PINE, PE6)) {} // wait until release
 			timer();
 		}
 	}
 }
 
 void timer() {
-	PORTE &= ~(1<<5); // on
-	mode = 0;
-	while (!bit_is_clear(PINE, PE6)) {
+	PORTE &= ~(1<<5); // timer LED on
+	mode = 0; // stopped
+	while (!bit_is_clear(PINE, PE6)) { // read input
 		PORTD = PINA;
 	}
-	while (bit_is_clear(PINE, PE6)) {}
+	while (bit_is_clear(PINE, PE6)) {} // confirm input
 	while(1) {
-		if (bit_is_clear(PINA, PA0)) {
+		if (bit_is_clear(PINA, PA0)) { // start timer
 			mode = 2;
-		} else if (bit_is_clear(PINA, PA1)) {
+		} else if (bit_is_clear(PINA, PA1)) { // stop
 			mode = 0;
-		} else if (bit_is_clear(PINA, PA2)) {
+		} else if (bit_is_clear(PINA, PA2)) { // clear
 			mode = -1;
-		} else if (bit_is_clear(PINE, PE6)) {
-			PORTE |= (1<<5); // off
+		} else if (bit_is_clear(PINE, PE6)) { // exit timer
+			PORTE |= (1<<5); // timer LED off
 			mode = -1;
-			while (bit_is_clear(PINE, PE6)) {}
-				return;
+			while (bit_is_clear(PINE, PE6)) {} // wait until release
+			return;
 		}
 	}
 }
 
-ISR (TIMER0_OVF_vect) {
+ISR (TIMER0_OVF_vect) { // mode interrupt 1/10 of second
 	iterations += 1;
 	if (iterations < TOT_ITERATIONS) {
 		TCNT0 = -125;
 	} else if (halfPer < TOT_HALF_PER) {
 		PORTD ^= (ones*16 + tenth);
-		if (mode == 1) {
+		if (mode == 1) { // stopwatch
 			tenth++;
 			if (tenth == 10) {
 				tenth = 0;
@@ -94,7 +94,7 @@ ISR (TIMER0_OVF_vect) {
 					ones = 0;
 				}
 			}
-		} else if (mode == 2) {
+		} else if (mode == 2) { // timer
 			if (tenth == 0) {
 				tenth = 9;
 				if (ones == 0) {
@@ -105,7 +105,7 @@ ISR (TIMER0_OVF_vect) {
 			} else {
 				tenth--;
 			}
-		} else if (mode == -1) {
+		} else if (mode == -1) { // clear
 			tenth = 0;
 			ones = 0;
 			PORTD = 0xFF;
