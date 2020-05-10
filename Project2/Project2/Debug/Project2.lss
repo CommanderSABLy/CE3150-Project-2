@@ -3,31 +3,31 @@ Project2.elf:     file format elf32-avr
 
 Sections:
 Idx Name          Size      VMA       LMA       File off  Algn
-  0 .data         00000000  00800100  00800100  0000020e  2**0
+  0 .data         00000000  00800100  00800100  00000242  2**0
                   CONTENTS, ALLOC, LOAD, DATA
-  1 .text         0000019a  00000000  00000000  00000074  2**1
+  1 .text         000001ce  00000000  00000000  00000074  2**1
                   CONTENTS, ALLOC, LOAD, READONLY, CODE
-  2 .bss          00000003  00800100  00800100  0000020e  2**0
+  2 .bss          00000004  00800100  00800100  00000242  2**0
                   ALLOC
-  3 .comment      00000030  00000000  00000000  0000020e  2**0
+  3 .comment      00000030  00000000  00000000  00000242  2**0
                   CONTENTS, READONLY
-  4 .note.gnu.avr.deviceinfo 00000040  00000000  00000000  00000240  2**2
+  4 .note.gnu.avr.deviceinfo 00000040  00000000  00000000  00000274  2**2
                   CONTENTS, READONLY
-  5 .debug_aranges 00000028  00000000  00000000  00000280  2**0
+  5 .debug_aranges 00000028  00000000  00000000  000002b4  2**0
                   CONTENTS, READONLY, DEBUGGING
-  6 .debug_info   00000a8f  00000000  00000000  000002a8  2**0
+  6 .debug_info   00000aa0  00000000  00000000  000002dc  2**0
                   CONTENTS, READONLY, DEBUGGING
-  7 .debug_abbrev 000009b3  00000000  00000000  00000d37  2**0
+  7 .debug_abbrev 000009b1  00000000  00000000  00000d7c  2**0
                   CONTENTS, READONLY, DEBUGGING
-  8 .debug_line   00000310  00000000  00000000  000016ea  2**0
+  8 .debug_line   00000328  00000000  00000000  0000172d  2**0
                   CONTENTS, READONLY, DEBUGGING
-  9 .debug_frame  00000048  00000000  00000000  000019fc  2**2
+  9 .debug_frame  00000054  00000000  00000000  00001a58  2**2
                   CONTENTS, READONLY, DEBUGGING
- 10 .debug_str    000004ce  00000000  00000000  00001a44  2**0
+ 10 .debug_str    000004d3  00000000  00000000  00001aac  2**0
                   CONTENTS, READONLY, DEBUGGING
- 11 .debug_loc    00000049  00000000  00000000  00001f12  2**0
+ 11 .debug_loc    00000063  00000000  00000000  00001f7f  2**0
                   CONTENTS, READONLY, DEBUGGING
- 12 .debug_ranges 00000018  00000000  00000000  00001f5b  2**0
+ 12 .debug_ranges 00000018  00000000  00000000  00001fe2  2**0
                   CONTENTS, READONLY, DEBUGGING
 
 Disassembly of section .text:
@@ -103,21 +103,21 @@ Disassembly of section .text:
   e0:	1d 92       	st	X+, r1
 
 000000e2 <.do_clear_bss_start>:
-  e2:	a3 30       	cpi	r26, 0x03	; 3
+  e2:	a4 30       	cpi	r26, 0x04	; 4
   e4:	b2 07       	cpc	r27, r18
   e6:	e1 f7       	brne	.-8      	; 0xe0 <.do_clear_bss_loop>
   e8:	0e 94 7a 00 	call	0xf4	; 0xf4 <main>
-  ec:	0c 94 cb 00 	jmp	0x196	; 0x196 <_exit>
+  ec:	0c 94 e5 00 	jmp	0x1ca	; 0x1ca <_exit>
 
 000000f0 <__bad_interrupt>:
   f0:	0c 94 00 00 	jmp	0	; 0x0 <__vectors>
 
 000000f4 <main>:
+unsigned char ones = 0;
 unsigned char iterations;
 unsigned char halfPer;
 
-int main(void)
-{
+int main() {
 	DDRD = 0xFF;
   f4:	8f ef       	ldi	r24, 0xFF	; 255
   f6:	8a b9       	out	0x0a, r24	; 10
@@ -140,14 +140,14 @@ int main(void)
  10a:	78 94       	sei
 	
 	iterations = 0;
- 10c:	10 92 01 01 	sts	0x0101, r1	; 0x800101 <iterations>
+ 10c:	10 92 02 01 	sts	0x0102, r1	; 0x800102 <iterations>
 	halfPer = 0;
- 110:	10 92 02 01 	sts	0x0102, r1	; 0x800102 <halfPer>
+ 110:	10 92 03 01 	sts	0x0103, r1	; 0x800103 <halfPer>
  114:	ff cf       	rjmp	.-2      	; 0x114 <main+0x20>
 
 00000116 <__vector_18>:
 	while (1) {
-		//PORTC = PIND;
+		// run
 	}
 }
 
@@ -157,81 +157,113 @@ ISR (TIMER0_OVF_vect) {
  11a:	0f b6       	in	r0, 0x3f	; 63
  11c:	0f 92       	push	r0
  11e:	11 24       	eor	r1, r1
- 120:	8f 93       	push	r24
- 122:	9f 93       	push	r25
+ 120:	2f 93       	push	r18
+ 122:	3f 93       	push	r19
+ 124:	8f 93       	push	r24
+ 126:	9f 93       	push	r25
 	iterations += 1;
- 124:	80 91 01 01 	lds	r24, 0x0101	; 0x800101 <iterations>
- 128:	8f 5f       	subi	r24, 0xFF	; 255
- 12a:	80 93 01 01 	sts	0x0101, r24	; 0x800101 <iterations>
+ 128:	80 91 02 01 	lds	r24, 0x0102	; 0x800102 <iterations>
+ 12c:	8f 5f       	subi	r24, 0xFF	; 255
+ 12e:	80 93 02 01 	sts	0x0102, r24	; 0x800102 <iterations>
 	if (iterations < TOT_ITERATIONS) {
- 12e:	89 31       	cpi	r24, 0x19	; 25
- 130:	18 f4       	brcc	.+6      	; 0x138 <__vector_18+0x22>
+ 132:	89 31       	cpi	r24, 0x19	; 25
+ 134:	18 f4       	brcc	.+6      	; 0x13c <__vector_18+0x26>
 		TCNT0 = -125;
- 132:	83 e8       	ldi	r24, 0x83	; 131
- 134:	86 bd       	out	0x26, r24	; 38
- 136:	28 c0       	rjmp	.+80     	; 0x188 <__vector_18+0x72>
+ 136:	83 e8       	ldi	r24, 0x83	; 131
+ 138:	86 bd       	out	0x26, r24	; 38
+ 13a:	3e c0       	rjmp	.+124    	; 0x1b8 <__vector_18+0xa2>
 		} else if (halfPer < TOT_HALF_PER) {
- 138:	80 91 02 01 	lds	r24, 0x0102	; 0x800102 <halfPer>
- 13c:	8a 30       	cpi	r24, 0x0A	; 10
- 13e:	f0 f4       	brcc	.+60     	; 0x17c <__vector_18+0x66>
-		PORTD ^= tenth;
- 140:	9b b1       	in	r25, 0x0b	; 11
- 142:	80 91 00 01 	lds	r24, 0x0100	; 0x800100 <_edata>
- 146:	89 27       	eor	r24, r25
- 148:	8b b9       	out	0x0b, r24	; 11
+ 13c:	80 91 03 01 	lds	r24, 0x0103	; 0x800103 <halfPer>
+ 140:	8a 30       	cpi	r24, 0x0A	; 10
+ 142:	a0 f5       	brcc	.+104    	; 0x1ac <__vector_18+0x96>
+		PORTD ^= (ones*16 + tenth);
+ 144:	9b b1       	in	r25, 0x0b	; 11
+ 146:	20 91 00 01 	lds	r18, 0x0100	; 0x800100 <_edata>
+ 14a:	80 91 01 01 	lds	r24, 0x0101	; 0x800101 <tenth>
+ 14e:	30 e1       	ldi	r19, 0x10	; 16
+ 150:	23 9f       	mul	r18, r19
+ 152:	80 0d       	add	r24, r0
+ 154:	11 24       	eor	r1, r1
+ 156:	89 27       	eor	r24, r25
+ 158:	8b b9       	out	0x0b, r24	; 11
 		tenth++;
- 14a:	80 91 00 01 	lds	r24, 0x0100	; 0x800100 <_edata>
- 14e:	8f 5f       	subi	r24, 0xFF	; 255
+ 15a:	80 91 01 01 	lds	r24, 0x0101	; 0x800101 <tenth>
+ 15e:	8f 5f       	subi	r24, 0xFF	; 255
 		if (tenth == 10) {
- 150:	8a 30       	cpi	r24, 0x0A	; 10
- 152:	19 f0       	breq	.+6      	; 0x15a <__vector_18+0x44>
+ 160:	8a 30       	cpi	r24, 0x0A	; 10
+ 162:	19 f0       	breq	.+6      	; 0x16a <__vector_18+0x54>
 	iterations += 1;
 	if (iterations < TOT_ITERATIONS) {
 		TCNT0 = -125;
 		} else if (halfPer < TOT_HALF_PER) {
-		PORTD ^= tenth;
+		PORTD ^= (ones*16 + tenth);
 		tenth++;
- 154:	80 93 00 01 	sts	0x0100, r24	; 0x800100 <_edata>
- 158:	02 c0       	rjmp	.+4      	; 0x15e <__vector_18+0x48>
+ 164:	80 93 01 01 	sts	0x0101, r24	; 0x800101 <tenth>
+ 168:	0c c0       	rjmp	.+24     	; 0x182 <__vector_18+0x6c>
 		if (tenth == 10) {
 			tenth = 0;
- 15a:	10 92 00 01 	sts	0x0100, r1	; 0x800100 <_edata>
+ 16a:	10 92 01 01 	sts	0x0101, r1	; 0x800101 <tenth>
+			ones++;
+ 16e:	80 91 00 01 	lds	r24, 0x0100	; 0x800100 <_edata>
+ 172:	8f 5f       	subi	r24, 0xFF	; 255
+			if (ones == 10) {
+ 174:	8a 30       	cpi	r24, 0x0A	; 10
+ 176:	19 f0       	breq	.+6      	; 0x17e <__vector_18+0x68>
+		} else if (halfPer < TOT_HALF_PER) {
+		PORTD ^= (ones*16 + tenth);
+		tenth++;
+		if (tenth == 10) {
+			tenth = 0;
+			ones++;
+ 178:	80 93 00 01 	sts	0x0100, r24	; 0x800100 <_edata>
+ 17c:	02 c0       	rjmp	.+4      	; 0x182 <__vector_18+0x6c>
+			if (ones == 10) {
+				ones = 0;
+ 17e:	10 92 00 01 	sts	0x0100, r1	; 0x800100 <_edata>
+			}
 		}
-		PORTD ^= tenth;
- 15e:	9b b1       	in	r25, 0x0b	; 11
- 160:	80 91 00 01 	lds	r24, 0x0100	; 0x800100 <_edata>
- 164:	89 27       	eor	r24, r25
- 166:	8b b9       	out	0x0b, r24	; 11
+		PORTD ^= (ones*16 + tenth);
+ 182:	9b b1       	in	r25, 0x0b	; 11
+ 184:	20 91 00 01 	lds	r18, 0x0100	; 0x800100 <_edata>
+ 188:	80 91 01 01 	lds	r24, 0x0101	; 0x800101 <tenth>
+ 18c:	30 e1       	ldi	r19, 0x10	; 16
+ 18e:	23 9f       	mul	r18, r19
+ 190:	80 0d       	add	r24, r0
+ 192:	11 24       	eor	r1, r1
+ 194:	89 27       	eor	r24, r25
+ 196:	8b b9       	out	0x0b, r24	; 11
 		iterations = 0;
- 168:	10 92 01 01 	sts	0x0101, r1	; 0x800101 <iterations>
+ 198:	10 92 02 01 	sts	0x0102, r1	; 0x800102 <iterations>
 		TCNT0 = -125;
- 16c:	83 e8       	ldi	r24, 0x83	; 131
- 16e:	86 bd       	out	0x26, r24	; 38
+ 19c:	83 e8       	ldi	r24, 0x83	; 131
+ 19e:	86 bd       	out	0x26, r24	; 38
 		halfPer += 1;
- 170:	80 91 02 01 	lds	r24, 0x0102	; 0x800102 <halfPer>
- 174:	8f 5f       	subi	r24, 0xFF	; 255
- 176:	80 93 02 01 	sts	0x0102, r24	; 0x800102 <halfPer>
- 17a:	06 c0       	rjmp	.+12     	; 0x188 <__vector_18+0x72>
+ 1a0:	80 91 03 01 	lds	r24, 0x0103	; 0x800103 <halfPer>
+ 1a4:	8f 5f       	subi	r24, 0xFF	; 255
+ 1a6:	80 93 03 01 	sts	0x0103, r24	; 0x800103 <halfPer>
+ 1aa:	06 c0       	rjmp	.+12     	; 0x1b8 <__vector_18+0xa2>
 		} else {
 		iterations = 0;
- 17c:	10 92 01 01 	sts	0x0101, r1	; 0x800101 <iterations>
+ 1ac:	10 92 02 01 	sts	0x0102, r1	; 0x800102 <iterations>
 		halfPer = 0;
- 180:	10 92 02 01 	sts	0x0102, r1	; 0x800102 <halfPer>
+ 1b0:	10 92 03 01 	sts	0x0103, r1	; 0x800103 <halfPer>
 		TCNT0 = -125;
- 184:	83 e8       	ldi	r24, 0x83	; 131
- 186:	86 bd       	out	0x26, r24	; 38
+ 1b4:	83 e8       	ldi	r24, 0x83	; 131
+ 1b6:	86 bd       	out	0x26, r24	; 38
 	}
 }
- 188:	9f 91       	pop	r25
- 18a:	8f 91       	pop	r24
- 18c:	0f 90       	pop	r0
- 18e:	0f be       	out	0x3f, r0	; 63
- 190:	0f 90       	pop	r0
- 192:	1f 90       	pop	r1
- 194:	18 95       	reti
+ 1b8:	9f 91       	pop	r25
+ 1ba:	8f 91       	pop	r24
+ 1bc:	3f 91       	pop	r19
+ 1be:	2f 91       	pop	r18
+ 1c0:	0f 90       	pop	r0
+ 1c2:	0f be       	out	0x3f, r0	; 63
+ 1c4:	0f 90       	pop	r0
+ 1c6:	1f 90       	pop	r1
+ 1c8:	18 95       	reti
 
-00000196 <_exit>:
- 196:	f8 94       	cli
+000001ca <_exit>:
+ 1ca:	f8 94       	cli
 
-00000198 <__stop_program>:
- 198:	ff cf       	rjmp	.-2      	; 0x198 <__stop_program>
+000001cc <__stop_program>:
+ 1cc:	ff cf       	rjmp	.-2      	; 0x1cc <__stop_program>
