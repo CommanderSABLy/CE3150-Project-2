@@ -14,6 +14,7 @@ ISR (TIMER0_OVF_vect);
 #define TOT_HALF_PER 10
 
 unsigned char tenth = 0;
+unsigned char ones = 0;
 unsigned char iterations;
 unsigned char halfPer;
 
@@ -41,12 +42,16 @@ ISR (TIMER0_OVF_vect) {
 	if (iterations < TOT_ITERATIONS) {
 		TCNT0 = -125;
 		} else if (halfPer < TOT_HALF_PER) {
-		PORTD ^= tenth;
+		PORTD ^= (ones*16 + tenth);
 		tenth++;
 		if (tenth == 10) {
 			tenth = 0;
+			ones++;
+			if (ones == 10) {
+				ones = 0;
+			}
 		}
-		PORTD ^= tenth;
+		PORTD ^= (ones*16 + tenth);
 		iterations = 0;
 		TCNT0 = -125;
 		halfPer += 1;
