@@ -17,6 +17,8 @@ unsigned char USART_RxChar();
 void USART_TxChar(char data);
 
 ISR (TIMER0_OVF_vect);
+ISR (USART1_UDRE_vect);
+ISR (USART1_RX_vect);
 
 #define TOT_ITERATIONS 25
 #define TOT_HALF_PER 10
@@ -33,7 +35,7 @@ unsigned char output_mode = '\0';
 char message = '\0';
 
 int main() {
-	DDRD = 0xFF; // make ouput
+	DDRD = 0xFB; // make ouput (PD2 is input)
 	PORTD = 0xFF; // turn off active high LEDs
 	DDRE = 0xBF; // make port 6 input, rest output
 	PORTE |= (1<<5); // 5th LED off
@@ -134,9 +136,7 @@ void sound(int mode)
 void USART_Init(unsigned long BR){
 	UCSR1B |= (1 << RXEN) | (1 << TXEN);
 	UCSR1C |= (1 << UCSZ1) | (1 << UCSZ0);
-	UCSR1B |= (0 << UCSZ2);
-	UCSR1C &= ~(1 << USBS);
-	
+
 	unsigned int my_ubrr = (F_CPU/(16*BR)) - 1;
 	
 	UBRR1L = my_ubrr;
@@ -144,26 +144,17 @@ void USART_Init(unsigned long BR){
 }
 
 unsigned char USART_RxChar()
-{
-	unsigned char my_rxv;
-	
-	if(bit_is_set(UCSR0A, RXC)){
-		my_rxv = UDR1;
-	}
-	
-	else{
-		my_rxv = '\0';
-	}
-	return my_rxv;
+{	
+	if((UCSR1A & (1 << RXC)))
+		return UDR1;
+	else
+		return '\0';
 }
 
 void USART_TxChar(char data)
 {
 	UDR1 = data;
-	
-	while(bit_is_clear(UCSR0A, TXC));
-	
-	UCSR1A |= (1 << TXC);
+	while(!(UCSR1A & (1 << UDRE)));
 }
 
 ISR (TIMER0_OVF_vect) { // mode interrupt 1/10 of second
