@@ -10,11 +10,17 @@
 #include <avr/sfr_defs.h> // bit_is_clear(PIND, PD2)
 
 void timer();
+void sound(int mode);
+
+void USART_Init(unsigned long);
+void USART_RxChar();
+void USART_TxChar();
 
 ISR (TIMER0_OVF_vect);
 
 #define TOT_ITERATIONS 25
 #define TOT_HALF_PER 10
+#define BAUDRATE 
 
 unsigned char tenth = 0;
 unsigned char ones = 0;
@@ -36,6 +42,7 @@ int main() {
 	TCCR0B = 0x04;
 	TIMSK0 = 0x01;
 	
+	
 	sei();
 	
 	iterations = 0;
@@ -44,8 +51,10 @@ int main() {
 	while (1) {
 		if (bit_is_clear(PINA, PA0)) { // start button
 			mode = 1;
+			sound(mode);
 		} else if (bit_is_clear(PINA, PA1)) { // stop button
 			mode = 0;
+			sound(mode);
 		} else if (bit_is_clear(PINA, PA2)) { // clear button
 			mode = -1;
 		} else if (bit_is_clear(PINE, PE6)) { // timer mode
@@ -77,6 +86,35 @@ void timer() {
 			return;
 		}
 	}
+}
+
+void sound(int mode)
+{
+	if(mode == 1){ //generates sound for start
+		for(int i = 0; i < 4; i++){
+			PORTE ^= 0xBF;  //toggle output
+			TCNT2 = -175;
+			TCCR2A = 0x00;
+			TCCR2B = 0x04;
+			while((TIFR2&(1<<TOV2))==0);
+			TCCR2A = 0x00;
+			TCCR2B = 0x00;
+			TIFR2 = 0x1;
+		}
+	}
+	else if(mode == 0){  //generates sound for stop
+		for(int i = 0; i < 2; i++){
+			PORTE ^= 0xBF;  //toggle output
+			TCNT2 = -200;
+			TCCR2A = 0x00;
+			TCCR2B = 0x04;
+			while((TIFR2&(1<<TOV2))==0);
+			TCCR2A = 0x00;
+			TCCR2B = 0x00;
+			TIFR2 = 0x1;
+		}
+	}
+	return;
 }
 
 ISR (TIMER0_OVF_vect) { // mode interrupt 1/10 of second
