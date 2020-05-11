@@ -12,15 +12,16 @@
 void timer();
 void sound(int mode);
 
-void USART_Init(unsigned long);
-void USART_RxChar();
-void USART_TxChar();
+void USART_Init(unsigned long BR);
+unsigned char USART_RxChar();
+void USART_TxChar(char data);
 
 ISR (TIMER0_OVF_vect);
 
 #define TOT_ITERATIONS 25
 #define TOT_HALF_PER 10
-#define BAUDRATE 
+#define BAUDRATE 9600
+#define F_CPU 16000000UL
 
 unsigned char tenth = 0;
 unsigned char ones = 0;
@@ -42,7 +43,7 @@ int main() {
 	TCCR0B = 0x04;
 	TIMSK0 = 0x01;
 	
-	
+	USART_Init(BAUDRATE);
 	sei();
 	
 	iterations = 0;
@@ -115,6 +116,42 @@ void sound(int mode)
 		}
 	}
 	return;
+}
+
+void USART_Init(unsigned long BR){
+	UCSR0B |= (1 << RXEN) | (1 << TXEN);
+	UCSR0C |= (1 << UCSZ1) | (1 << UCSZ0);
+	UCSR0B |= (0 << UCSZ2);
+	UCSR0C &= ~(1 << USBS);
+	
+	unsigned int my_ubrr = (F_CPU/(16*BR)) - 1;
+	
+	UBRR0L = my_ubrr;
+	UBRR0H = (my_ubrr >> 8);
+	
+}
+
+unsigned char USART_RxChar()
+{
+	unsigned char my_rxv;
+	
+	if(bit_is_set(UCSR0A, RXC)){
+		my_rxv = UDRE;
+	}
+	
+	else{
+		my_rxv = '\0';
+	}
+	return my_rxv;
+}
+
+void USART_TxChar(char data)
+{
+	UDRE = data;
+	
+	while(bit_is_clear(UCSR0A, TXC));
+	
+	UCSR0A |= (1 << TXC);
 }
 
 ISR (TIMER0_OVF_vect) { // mode interrupt 1/10 of second
