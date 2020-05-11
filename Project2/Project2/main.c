@@ -29,6 +29,8 @@ unsigned char iterations;
 unsigned char halfPer;
 
 int mode = 0;
+unsigned char output_mode = '\0';
+char message = '\0';
 
 int main() {
 	DDRD = 0xFF; // make ouput
@@ -62,6 +64,17 @@ int main() {
 			mode = -1;
 			while (bit_is_clear(PINE, PE6)) {} // wait until release
 			timer();
+		}
+		output_mode = USART_RxChar();  //check to see if user wants to know mode
+		if(output_mode == 'M'){   //user must inquire 'M' for a mode update
+			if(mode == 1){
+				message = 'S';  //system responds with 'S' if in Stopwatch
+				USART_TxChar(message);
+			}
+			if(mode == 2){
+				message = 'T';  //system responds with 'T' if in Timer
+				USART_TxChar(message);
+			}
 		}
 	}
 }
