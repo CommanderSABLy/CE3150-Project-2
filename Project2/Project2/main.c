@@ -119,16 +119,15 @@ void sound(int mode)
 }
 
 void USART_Init(unsigned long BR){
-	UCSR0B |= (1 << RXEN) | (1 << TXEN);
-	UCSR0C |= (1 << UCSZ1) | (1 << UCSZ0);
-	UCSR0B |= (0 << UCSZ2);
-	UCSR0C &= ~(1 << USBS);
+	UCSR1B |= (1 << RXEN) | (1 << TXEN);
+	UCSR1C |= (1 << UCSZ1) | (1 << UCSZ0);
+	UCSR1B |= (0 << UCSZ2);
+	UCSR1C &= ~(1 << USBS);
 	
 	unsigned int my_ubrr = (F_CPU/(16*BR)) - 1;
 	
-	UBRR0L = my_ubrr;
-	UBRR0H = (my_ubrr >> 8);
-	
+	UBRR1L = my_ubrr;
+	UBRR1H = (my_ubrr >> 8);
 }
 
 unsigned char USART_RxChar()
@@ -136,7 +135,7 @@ unsigned char USART_RxChar()
 	unsigned char my_rxv;
 	
 	if(bit_is_set(UCSR0A, RXC)){
-		my_rxv = UDRE;
+		my_rxv = UDR1;
 	}
 	
 	else{
@@ -147,11 +146,11 @@ unsigned char USART_RxChar()
 
 void USART_TxChar(char data)
 {
-	UDRE = data;
+	UDR1 = data;
 	
 	while(bit_is_clear(UCSR0A, TXC));
 	
-	UCSR0A |= (1 << TXC);
+	UCSR1A |= (1 << TXC);
 }
 
 ISR (TIMER0_OVF_vect) { // mode interrupt 1/10 of second
