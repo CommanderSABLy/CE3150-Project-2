@@ -12,10 +12,15 @@
 void timer();
 void sound(int mode);
 
+void USART_Init(unsigned long);
+void USART_RxChar();
+void USART_TxChar();
+
 ISR (TIMER0_OVF_vect);
 
 #define TOT_ITERATIONS 25
 #define TOT_HALF_PER 10
+#define BAUDRATE 
 
 unsigned char tenth = 0;
 unsigned char ones = 0;
