@@ -11,6 +11,7 @@
 
 void timer();
 void sound(int mode);
+void alarm();
 
 void USART_Init(unsigned long BR);
 unsigned char USART_RxChar();
@@ -45,6 +46,11 @@ int main() {
 	TCCR0B = 0x04;
 	TIMSK0 = 0x01;
 	
+	TCNT1H = (-31250)>>8;
+	TCNT1L = (-31250)&0xFF;
+	TCCR1A = 0x00;
+	TCCR1B = 0x04;
+	
 	USART_Init(BAUDRATE);
 	sei();
 	
@@ -77,6 +83,24 @@ int main() {
 			}
 		}
 	}
+}
+
+void alarm(){
+	TIMSK1 = (1<<TOIE1);
+	
+	while(!bit_is_clear(PINA, PA1)){
+		PORTE ^= 0xBF;  //toggle output
+		TCNT2 = -175;
+		TCCR2A = 0x00;
+		TCCR2B = 0x04;
+		while((TIFR2&(1<<TOV2))==0);
+		TCCR2A = 0x00;
+		TCCR2B = 0x00;
+		TIFR2 = 0x1;
+	}
+	
+	TIMSK1 = (0<<TOIE1);
+	return;
 }
 
 void timer() {
@@ -208,4 +232,8 @@ ISR (TIMER0_OVF_vect) { // mode interrupt 1/10 of second
 	}
 }
 
-
+ISR (TIMER1_OVF_vect){
+	TCNT1H = (-31250)>>8;
+	TCNT1L = (-31250)&0xFF;
+	PORTD ^= 0xFF;
+}
