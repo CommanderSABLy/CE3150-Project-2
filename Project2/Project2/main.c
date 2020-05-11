@@ -28,6 +28,7 @@ ISR (USART1_RX_vect);*/
 
 unsigned char tenth = 0;
 unsigned char ones = 0;
+//unsigned int total_time = 0;
 unsigned char iterations;
 unsigned char halfPer;
 
@@ -67,6 +68,8 @@ int main() {
 		} else if (bit_is_clear(PINA, PA1)) { // stop button
 			mode = 0;
 			sound(mode);
+			//USART_TxChar(total_time);
+			//total_time = 0
 		} else if (bit_is_clear(PINA, PA2)) { // clear button
 			mode = -1;
 		} else if (bit_is_clear(PINE, PE6)) { // timer mode
@@ -223,6 +226,7 @@ ISR (TIMER0_OVF_vect) { // mode interrupt 1/10 of second
 		PORTD ^= (ones*16 + tenth);
 		if (mode == 1) { // stopwatch
 			tenth++;
+			//++total_time;
 			if (tenth == 10) {
 				tenth = 0;
 				ones++;
