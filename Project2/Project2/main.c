@@ -31,8 +31,7 @@ unsigned char iterations;
 unsigned char halfPer;
 
 int mode = 0;
-unsigned char output_mode = '\0';
-char message = '\0';
+unsigned char message = '\0';
 
 int main() {
 	DDRD = 0xFB; // make ouput (PD2 is input)
@@ -67,8 +66,8 @@ int main() {
 			while (bit_is_clear(PINE, PE6)) {} // wait until release
 			timer();
 		}
-		output_mode = USART_RxChar();  //check to see if user wants to know mode
-		if(output_mode == 'M'){   //user must inquire 'M' for a mode update
+		message = USART_RxChar();  //check to see if user wants to know mode
+		if(message == 'M'){   //user must inquire 'M' for a mode update
 			if(mode == 1){
 				message = 'S';  //system responds with 'S' if in Stopwatch
 				USART_TxChar(message);
@@ -197,6 +196,12 @@ ISR (TIMER0_OVF_vect) { // mode interrupt 1/10 of second
 		halfPer = 0;
 		TCNT0 = -125;
 	}
+}
+ISR (USART1_UDRE_vect){
+	UDR1 = 'x'; 
+}
+ISR (USART1_RX_vect){
+	message = UDR1;
 }
 
 
