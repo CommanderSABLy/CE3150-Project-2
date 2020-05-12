@@ -36,7 +36,6 @@ int mode = 0;
 unsigned char message = '\0';
 
 int main() {
-	//DDRD = 0xFB; // make output (PD2 is input)
 	DDRD = 0xFF; // make output
 	PORTD = 0xFF; // turn off active high LEDs
 	DDRE = 0xBB; // make port 2 and 6 input, rest output
@@ -172,9 +171,9 @@ void timer() {
 }
 
 void sound(int mode) {
-	if (mode == 1) { //generates sound for start
+	if (mode == 1) { // generates sound for start
 		for (int i = 0; i < 4; i++) {
-			PORTE ^= 0xBF;  //toggle output
+			PORTE ^= 0xBF;  // toggle output
 			TCNT2 = -175;
 			TCCR2A = 0x00;
 			TCCR2B = 0x04;
@@ -183,9 +182,9 @@ void sound(int mode) {
 			TCCR2B = 0x00;
 			TIFR2 = 0x1;
 		}
-	} else if (mode == 0) { //generates sound for stop
+	} else if (mode == 0) { // generates sound for stop
 		for (int i = 0; i < 2; i++) {
-			PORTE ^= 0xBF;  //toggle output
+			PORTE ^= 0xBF;  // toggle output
 			TCNT2 = -200;
 			TCCR2A = 0x00;
 			TCCR2B = 0x04;
@@ -205,7 +204,7 @@ void USART_Init(unsigned long BR) {
 	UCSR2C &= ~(1<<USBS);
 	
 	// enable interrupts for rxc
-	//UCSR2B |= (1<<RXCIE)|(0<<UDRIE);
+	UCSR2B |= (1<<RXCIE)|(0<<UDRIE);
 	
 	unsigned int my_ubrr = (F_CPU/(16*BR)) - 1;
 	
