@@ -13,13 +13,13 @@ void timer();
 void sound(int mode);
 void alarm();
 
-/*void USART_Init(unsigned long BR);
+void USART_Init(unsigned long BR);
 unsigned char USART_RxChar();
-void USART_TxChar(char data);*/
+void USART_TxChar(char data);
 
 ISR (TIMER0_OVF_vect);
-/*ISR (USART1_UDRE_vect);
-ISR (USART1_RX_vect);*/
+ISR (USART2_UDRE_vect);
+ISR (USART2_RX_vect);
 
 #define TOT_ITERATIONS 25
 #define TOT_HALF_PER 10
@@ -28,7 +28,7 @@ ISR (USART1_RX_vect);*/
 
 unsigned char tenth = 0;
 unsigned char ones = 0;
-//unsigned int total_time = 0;
+unsigned int total_time = 0;
 unsigned char iterations;
 unsigned char halfPer;
 
@@ -39,7 +39,7 @@ int main() {
 	//DDRD = 0xFB; // make output (PD2 is input)
 	DDRD = 0xFF;
 	PORTD = 0xFF; // turn off active high LEDs
-	DDRE = 0xBF; // make port 6 input, rest output
+	DDRE = 0xBB; // make port 2 and 6 input, rest output
 	PORTE |= (1<<5); // 5th LED off
 	DDRA = 0x00; // make PA input
 	PORTA = 0xFF; // enable pull up on PA
@@ -54,8 +54,7 @@ int main() {
 	TCCR1A = 0x00;
 	TCCR1B = 0x04;
 	
-	//USART_Init(BAUDRATE);
-	//TIMSK1 = 0x01;
+	USART_Init(BAUDRATE);
 	sei();
 	
 	iterations = 0;
@@ -68,8 +67,8 @@ int main() {
 		} else if (bit_is_clear(PINA, PA1)) { // stop button
 			mode = 0;
 			sound(mode);
-			//USART_TxChar(total_time);
-			//total_time = 0
+			USART_TxChar(total_time);
+			total_time = 0;
 		} else if (bit_is_clear(PINA, PA2)) { // clear button
 			mode = -1;
 		} else if (bit_is_clear(PINE, PE6)) { // timer mode
@@ -77,7 +76,7 @@ int main() {
 			while (bit_is_clear(PINE, PE6)) {} // wait until release
 			timer();
 		}
-		/*message = USART_RxChar();  //check to see if user wants to know mode
+		message = USART_RxChar();  //check to see if user wants to know mode
 		if(message == 'M'){   //user must inquire 'M' for a mode update
 			if(mode == 1){
 				message = 'S';  //system responds with 'S' if in Stopwatch
@@ -87,7 +86,7 @@ int main() {
 				message = 'T';  //system responds with 'T' if in Timer
 				USART_TxChar(message);
 			}
-		}*/
+		}
 	}
 }
 
@@ -195,28 +194,34 @@ void sound(int mode) {
 	return;
 }
 
-/*void USART_Init(unsigned long BR) {
-	UCSR1B |= (1 << RXEN) | (1 << TXEN);
-	UCSR1C |= (1 << UCSZ1) | (1 << UCSZ0);
+void USART_Init(unsigned long BR) {
+	UCSR2B |= (1 << RXEN) | (1 << TXEN);
+	UCSR2C |= (1 << UCSZ1) | (1 << UCSZ0);
 
+	UCSR2C &= ~(1<<USBS);
+	
+	// enable interrupts for rxc
+	UCSR2B |= (1<<RXCIE)|(0<<UDRIE);
+	
 	unsigned int my_ubrr = (F_CPU/(16*BR)) - 1;
 	
-	UBRR1L = my_ubrr;
-	UBRR1H = (my_ubrr >> 8);
+	UBRR2L = my_ubrr;
+	UBRR2H = (my_ubrr >> 8);
 }
 
 unsigned char USART_RxChar() {	
-	if ((UCSR1A & (1 << RXC))) {
-		return UDR1;
+	if ((UCSR2A & (1 << RXC))) {
+		return UDR2;
 	} else {
 		return '\0';
 	}
 }
 
 void USART_TxChar(char data) {
-	UDR1 = data;
-	while (!(UCSR1A & (1 << UDRE)));
-}*/
+	UDR2 = data;
+	while (!(UCSR2A & (1 << UDRE)));
+	//UCSR2A |= (1<<TXC); //fjhgjhgj
+}
 
 ISR (TIMER0_OVF_vect) { // mode interrupt 1/10 of second
 	iterations += 1;
@@ -260,12 +265,16 @@ ISR (TIMER0_OVF_vect) { // mode interrupt 1/10 of second
 		TCNT0 = -125;
 	}
 }
-/*ISR (USART1_UDRE_vect) {
-	UDR1 = 'x'; 
+ISR (USART2_UDRE_vect) {
+	UDR2 = 'x'; 
 }
-ISR (USART1_RX_vect) {
-	message = UDR1;
-}*/
+ISR (USART2_RX_vect) {
+	//message = UDR2;
+	unsigned char hi = UDR2;
+	if (hi == 'a') {
+		PORTE &= ~(1<<5); // timer LED on
+	}
+}
 
 ISR (TIMER1_OVF_vect) {
 	TCNT1H = (-31250) >> 8;
