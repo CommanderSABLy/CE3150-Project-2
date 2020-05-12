@@ -37,7 +37,7 @@ unsigned char message = '\0';
 
 int main() {
 	//DDRD = 0xFB; // make output (PD2 is input)
-	DDRD = 0xFF;
+	DDRD = 0xFF; // make output
 	PORTD = 0xFF; // turn off active high LEDs
 	DDRE = 0xBB; // make port 2 and 6 input, rest output
 	PORTE |= (1<<5)|(1<<2)|(1<<3); // 5th LED off
@@ -224,7 +224,6 @@ unsigned char USART_RxChar() {
 void USART_TxChar(char data) {
 	UDR2 = data;
 	while (!(UCSR2A & (1 << UDRE)));
-	//UCSR2A |= (1<<TXC); //fjhgjhgj
 }
 
 ISR (TIMER0_OVF_vect) { // mode interrupt 1/10 of second
@@ -235,7 +234,7 @@ ISR (TIMER0_OVF_vect) { // mode interrupt 1/10 of second
 		PORTD ^= (ones*16 + tenth);
 		if (mode == 1) { // stopwatch
 			tenth++;
-			//++total_time;
+			total_time++;
 			if (tenth == 10) {
 				tenth = 0;
 				ones++;
@@ -273,9 +272,8 @@ ISR (USART2_UDRE_vect) {
 	UDR2 = 'x'; 
 }
 ISR (USART2_RX_vect) {
-	//message = UDR2;
-	unsigned char hi = UDR2;
-	if (hi == 'a') {
+	message = UDR2;
+	if (message == 'a') {
 		PORTE &= ~(1<<5); // timer LED on
 	}
 }
