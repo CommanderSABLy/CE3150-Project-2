@@ -76,6 +76,8 @@ int main() {
 			mode = -1;
 			while (bit_is_clear(PINE, PE6)) {} // wait until release
 			timer();
+		} else if (bit_is_clear(PINA, PA3)) {
+			USART_TxChar(total_time);
 		}
 		message1 = USART_RxChar();  //check to see if user wants to know mode
 		if(message1 == 'M'){   //user must inquire 'M' for a mode update
