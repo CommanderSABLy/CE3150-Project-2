@@ -40,7 +40,7 @@ int main() {
 	DDRD = 0xFF;
 	PORTD = 0xFF; // turn off active high LEDs
 	DDRE = 0xBB; // make port 2 and 6 input, rest output
-	PORTE |= (1<<5); // 5th LED off
+	PORTE |= (1<<5)|(1<<2)|(1<<3); // 5th LED off
 	DDRA = 0x00; // make PA input
 	PORTA = 0xFF; // enable pull up on PA
 	
@@ -60,6 +60,8 @@ int main() {
 	iterations = 0;
 	halfPer = 0;
 	
+	unsigned char message1;
+	
 	while (1) {
 		if (bit_is_clear(PINA, PA0)) { // start button
 			mode = 1;
@@ -76,8 +78,10 @@ int main() {
 			while (bit_is_clear(PINE, PE6)) {} // wait until release
 			timer();
 		}
-		message = USART_RxChar();  //check to see if user wants to know mode
-		if(message == 'M'){   //user must inquire 'M' for a mode update
+		message1 = USART_RxChar();  //check to see if user wants to know mode
+		if(message1 == 'M'){   //user must inquire 'M' for a mode update
+			PORTE &= ~(1<<5); // timer LED on
+			sound(mode);
 			if(mode == 1){
 				message = 'S';  //system responds with 'S' if in Stopwatch
 				USART_TxChar(message);
@@ -201,7 +205,7 @@ void USART_Init(unsigned long BR) {
 	UCSR2C &= ~(1<<USBS);
 	
 	// enable interrupts for rxc
-	UCSR2B |= (1<<RXCIE)|(0<<UDRIE);
+	//UCSR2B |= (1<<RXCIE)|(0<<UDRIE);
 	
 	unsigned int my_ubrr = (F_CPU/(16*BR)) - 1;
 	
