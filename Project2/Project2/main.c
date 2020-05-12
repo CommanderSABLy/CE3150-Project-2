@@ -107,7 +107,7 @@ void alarm() {
 		TCCR2B = 0x00;
 		TIFR2 = 0x1;
 	}
-	mode = -1;
+	mode = 0;
 	TIMSK1 = 0x00;
 	tenth = 0;
 	ones = 0;
